@@ -1,0 +1,19 @@
+name: flutter_getx
+description: A new brick created with the Mason CLI.
+
+version: 0.1.0+1
+
+environment:
+  mason: ">=0.1.0-dev.60 <0.1.0"
+
+vars:
+  project_name:
+    type: string
+    description: "The name of your flutter project"
+    prompt: "Enter your project name"
+
+  package_name:
+    type: string
+    description: "The package name of your flutter project"
+    prompt: "Enter the package name (e.g. com.example.myapp)"
+
