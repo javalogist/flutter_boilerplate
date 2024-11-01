@@ -33,6 +33,8 @@ migrate_working_dir/
 pubspec.lock
 analysis_options.yaml
 /ios/Podfile.lock
+
+#Environment related files
 .*env*
 
 # Symbolication relatedd

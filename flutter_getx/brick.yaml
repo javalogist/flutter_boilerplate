@@ -12,8 +12,44 @@ vars:
     description: "The name of your flutter project"
     prompt: "Enter your project name"
 
+  application_name:
+    type: string
+    description: "The name of your application"
+    prompt: "Enter your application name"
+
+  project_description:
+    type: string
+    description: "A brief description of your flutter project"
+    prompt: "Enter your project description"
+
+  author_name:
+    type: string
+
   package_name:
     type: string
     description: "The package name of your flutter project"
     prompt: "Enter the package name (e.g. com.example.myapp)"
+
+  version:
+    type: string
+    description: "The version of your flutter project"
+    prompt: "Enter the version (e.g. 1.0.0)"
+
+
+
+  ios_deployment_target:
+    type: string
+    description: "iOS deployment target version"
+    prompt: "Enter iOS deployment target version (e.g. 13.0)"
+
+
+  android_min_sdk:
+    type: string
+    description: "Android minimum SDK version"
+    prompt: "Enter Android minimum SDK version (e.g. 21)"
+
+  android_max_sdk:
+    type: string
+    description: "Android maximum SDK version"
+    prompt: "Enter Android maximum SDK version (e.g. 30)"
 
