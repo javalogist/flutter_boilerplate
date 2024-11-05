@@ -1,80 +1,62 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:get/get.dart' as getx;
-import 'package:{{project_name}}/app/core/models/base_response_model.dart';
-import 'package:{{project_name}}/app/data/network/api_client.dart';
+import 'package:flutter/material.dart';
+import 'package:{{project_name}}/app/core/models/user_model.dart';
 
-abstract class BaseService {
-  final _apiClient = getx.Get.find<ApiClient>();
+class BaseResponse<T, U> {
+  final bool status;
+  final String? message;
+  final T? data;
 
-  Future<BaseResponse<T, U>> get<T,U>({
-    required String endpoint,
-  }) async {
-    try {
-      var res = await _apiClient.getRequest(endpoint);
-      return BaseResponse<T, U>.fromJson(res.data as Map<String, dynamic>);
-    } catch (ex) {
-      return BaseResponse(status: false,message: "", data: null);
+  BaseResponse({
+    required this.status,
+    this.message,
+    this.data,
+  });
+
+  factory BaseResponse.fromJson(Map<String, dynamic> json) {
+    return BaseResponse(
+      status: json['status'] ?? false,
+      message: json['message'],
+      data: json['data'] != null ? _parseData<T, U>(json['data']) : null,
+    );
+  }
+
+  factory BaseResponse.fromBaseJson(Map<String, dynamic>? json) {
+    return BaseResponse(
+      status: json != null,
+      message: json != null ? "Success" : "Failure",
+      data: json != null ? _parseData<T, U>(json) : null,
+    );
+  }
+
+  static T _parseData<T, U>(dynamic jsonData) {
+    if (jsonData is List) {
+      // Handling the list case where T is a List<U>
+      final list = jsonData
+          .map((item) => _fromJsonSingle<U>(item))
+          .where((item) => item != null)
+          .cast<U>()
+          .toList(); // Explicitly cast to List<U>
+      return list as T; // Cast the final list to T
+    } else {
+      // Handling the single object case
+      return _fromJsonSingle<U>(jsonData) as T;
     }
   }
 
-  Future<BaseResponse<T, U>> post<T,U>({
-    required String endpoint,
-    dynamic data,
-  }) async {
-    try {
-      var res = await _apiClient.postRequest(endpoint, data: data);
-      return BaseResponse<T, U>.fromJson(res.data as Map<String, dynamic>);
-    } catch (ex) {
-      return BaseResponse(status: false,message: "", data: null);
-    }
-  }
+  static U? _fromJsonSingle<U>(dynamic json) {
+    // Create a mapping of types to constructors
+    debugPrint("It is coming here as $U");
+    final Map<Type, Function(dynamic)> typeMap = {
+      UserModel: (json) => UserModel.fromJson(json),
+      //Add other models here
+    };
 
-  Future<BaseResponse<T, U>> put<T,U>({
-    required String endpoint,
-    dynamic data,
-  }) async {
-    try {
-      var res = await _apiClient.putRequest(endpoint, data: data);
-      return BaseResponse<T, U>.fromJson(res.data as Map<String, dynamic>);
-    } catch (ex) {
-      return BaseResponse(status: false,message: "", data: null);
-    }
-  }
-
-  Future<BaseResponse<T, U>> delete<T,U>({
-    required String endpoint,
-    dynamic queryParams,
-  }) async {
-    try {
-      var res = await _apiClient.deleteRequest(endpoint,
-          queryParameters: queryParams);
-      return BaseResponse<T, U>.fromJson(res.data as Map<String, dynamic>);
-    } catch (ex) {
-      return BaseResponse(status: false,message: "", data: null);
-    }
-  }
-
-  Future<BaseResponse<T, U>> multiPartPost<T,U>({
-    required String endpoint,
-    required File file,
-    required String fileKey,
-    bool requiresAuthorizationHeader = true,
-  }) async {
-    try {
-      String fileName = file.path
-          .split('/')
-          .last;
-      FormData formData = FormData.fromMap({
-        fileKey: await MultipartFile.fromFile(file.path, filename: fileName),
-      });
-      // Make a multipart POST request
-      return await post(
-        endpoint: endpoint,
-        data: formData,
-      );
-    } catch (ex) {
-      return BaseResponse(status: false,message: "", data: null);
+    final constructor = typeMap[U];
+    if (constructor != null) {
+      return constructor(json) as U;
+    } else {
+      debugPrint("Model not registered in the parser factory");
+      return null;
     }
   }
 }
